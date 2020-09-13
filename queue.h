@@ -96,10 +96,10 @@ void q_reverse(queue_t *q);
  * element, do nothing.
  */
 void q_sort(queue_t *q);
-void MergeSort(list_ele_t **headRef);
+void MergeSort(list_ele_t **head);
 void FrontBackSplit(list_ele_t *source,
                     list_ele_t **frontRef,
                     list_ele_t **backRef);
-list_ele_t *SortedMerge(list_ele_t *a, list_ele_t *b);
+list_ele_t *SortedMerge(list_ele_t *left_list, list_ele_t *right_list);
 
 #endif /* LAB0_QUEUE_H */

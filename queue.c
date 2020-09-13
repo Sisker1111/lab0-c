@@ -23,7 +23,9 @@ queue_t *q_new()
 /* Free all storage used by queue */
 void q_free(queue_t *q)
 {
-    if (!q->head) {
+    if (!q)
+        return;
+    if (q->head) {
         list_ele_t *tmp = q->head;
         while (q->head) {  // free all element in link-list
             q->head = q->head->next;
@@ -32,6 +34,7 @@ void q_free(queue_t *q)
             tmp = q->head;
         }
     }
+
     free(q);
 }
 
@@ -44,25 +47,27 @@ void q_free(queue_t *q)
  */
 bool q_insert_head(queue_t *q, char *s)
 {
+    if (!q)
+        return false;
     list_ele_t *newh;
     /* TODO: What should you do if the q is NULL? */
     newh = malloc(sizeof(list_ele_t));
-    if (!q || !newh) {  // queue q is not exist || malloc return NULL
+    if (!newh)  // queue q is not exist || malloc return NULL
+        return false;
+
+    // size_t len = strlen(s) + 1;
+    newh->value = malloc(sizeof(char) * (strlen(s) + 1));
+    if (!newh->value) {
+        free(newh);
         return false;
     }
-    size_t len = strlen(s) + 1;
-    newh->value = malloc(sizeof(char) * len);
-    strncpy(newh->value, s, len);
+    strncpy(newh->value, s, strlen(s) + 1);
 
-    // list_ele_t **cursur = &q->head;
     if (!q->head) {
         q->tail = newh;
     }
     newh->next = q->head;
     q->head = newh;
-    // for( ; *cursur && (*cursur)->next ; cursur = &(*cursur)->next)
-    //     ;
-    // q->tail = *cursur;
     q->size++;
     return true;
 }
@@ -76,13 +81,19 @@ bool q_insert_head(queue_t *q, char *s)
  */
 bool q_insert_tail(queue_t *q, char *s)
 {
+    if (!q)
+        return false;
     list_ele_t *newh;
     newh = malloc(sizeof(list_ele_t));
-    if (!q || !newh) {  // queue q is not exist || malloc return NULL
+    if (!newh)  // queue q is not exist || malloc return NULL
         return false;
-    }
+
     size_t len = strlen(s) + 1;
     newh->value = malloc(sizeof(char) * len);
+    if (!newh->value) {
+        free(newh);
+        return false;
+    }
     strncpy(newh->value, s, len);
     if (!q->head) {
         newh->next = q->head;
@@ -112,15 +123,19 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
     /* TODO: Remove the above comment when you are about to implement. */
     if (!q || !q->head)  // queue q is not exist
         return false;
-    if (bufsize > strlen(q->head->value)) {
-        strncpy(sp, q->head->value, strlen(q->head->value));
-        sp[strlen(q->head->value)] = '\0';
-    } else {
-        strncpy(sp, q->head->value, bufsize - 1);
-        sp[bufsize - 1] = '\0';
+    if (sp) {
+        if (bufsize > strlen(q->head->value)) {
+            strncpy(sp, q->head->value, strlen(q->head->value));
+            sp[strlen(q->head->value)] = '\0';
+        } else {
+            strncpy(sp, q->head->value, bufsize - 1);
+            sp[bufsize - 1] = '\0';
+        }
     }
+
     list_ele_t *tmp = q->head;
     q->head = q->head->next;
+    free(tmp->value);
     free(tmp);
     q->size--;
     return true;
@@ -144,6 +159,8 @@ int q_size(queue_t *q)
  */
 void q_reverse(queue_t *q)
 {
+    if (!q)
+        return;
     list_ele_t *cursor = NULL;
     list_ele_t **indirect = &q->head;
     q->tail = q->head;
@@ -171,7 +188,7 @@ list_ele_t *SortedMerge(list_ele_t *left_list, list_ele_t *right_list)
     list_ele_t *result = NULL;
 
     /* Pick either a or b, and recur */
-    if (strcmp(left_list->value, right_list->value) <= 0) {
+    if (strcmp(left_list->value, right_list->value) < 0) {
         result = left_list;
         result->next = SortedMerge(left_list->next, right_list);
     } else {
@@ -227,12 +244,14 @@ void MergeSort(list_ele_t **head)
 }
 
 
+
 void q_sort(queue_t *q)
 {
+    if (!q)
+        return;
     MergeSort(&q->head);
     list_ele_t *cursor = q->head;
     for (; cursor && cursor->next; cursor = cursor->next)
         ;
-
     q->tail = cursor;
 }
