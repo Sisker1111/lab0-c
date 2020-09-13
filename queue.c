@@ -55,7 +55,6 @@ bool q_insert_head(queue_t *q, char *s)
     if (!newh)  // queue q is not exist || malloc return NULL
         return false;
 
-    // size_t len = strlen(s) + 1;
     newh->value = malloc(sizeof(char) * (strlen(s) + 1));
     if (!newh->value) {
         free(newh);
@@ -88,13 +87,12 @@ bool q_insert_tail(queue_t *q, char *s)
     if (!newh)  // queue q is not exist || malloc return NULL
         return false;
 
-    size_t len = strlen(s) + 1;
-    newh->value = malloc(sizeof(char) * len);
+    newh->value = malloc(sizeof(char) * (strlen(s) + 1));
     if (!newh->value) {
         free(newh);
         return false;
     }
-    strncpy(newh->value, s, len);
+    strncpy(newh->value, s, strlen(s) + 1);
     if (!q->head) {
         newh->next = q->head;
         q->head = newh;
