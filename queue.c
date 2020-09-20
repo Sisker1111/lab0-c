@@ -176,80 +176,66 @@ void q_reverse(queue_t *q)
  * No effect if q is NULL or empty. In addition, if q has only one
  * element, do nothing.
  */
-list_ele_t *SortedMerge(list_ele_t *left_list, list_ele_t *right_list)
+list_ele_t *merge(list_ele_t *left_list, list_ele_t *right_list)
 {
-    /* Base cases */
-    if (!left_list)
-        return right_list;
-    else if (!right_list)
-        return left_list;
-    list_ele_t *result = NULL;
-
-    /* Pick either a or b, and recur */
-    if (strcmp(left_list->value, right_list->value) < 0) {
-        result = left_list;
-        result->next = SortedMerge(left_list->next, right_list);
+    list_ele_t *tmp = NULL;
+    if (strcmp(left_list->value, right_list->value) <= 0) {
+        tmp = left_list;
+        left_list = left_list->next;
     } else {
-        result = right_list;
-        result->next = SortedMerge(left_list, right_list->next);
+        tmp = right_list;
+        right_list = right_list->next;
     }
 
-    return result;
-}
-
-void FrontBackSplit(list_ele_t *source,
-                    list_ele_t **frontRef,
-                    list_ele_t **backRef)
-{
-    if (source == NULL || source->next == NULL) {
-        *frontRef = source;
-        *backRef = NULL;
-        return;
-    }
-    list_ele_t *slow = source;
-    list_ele_t *fast = source->next;
-
-    while (fast != NULL) {
-        fast = fast->next;
-        if (fast != NULL) {
-            slow = slow->next;
-            fast = fast->next;
+    list_ele_t *head = tmp;
+    while (left_list && right_list) {
+        if (strcmp(left_list->value, right_list->value) <= 0) {
+            tmp->next = left_list;
+            tmp = tmp->next;
+            left_list = left_list->next;
+        } else {
+            tmp->next = right_list;
+            tmp = tmp->next;
+            right_list = right_list->next;
         }
     }
 
-    /* 'slow' is before the midpoint in the list, so split it in two
-    at that point. */
-    *frontRef = source;
-    *backRef = slow->next;
-    slow->next = NULL;
+    if (left_list)
+        tmp->next = left_list;
+    if (right_list)
+        tmp->next = right_list;
+
+    return head;
 }
 
-void MergeSort(list_ele_t **head)
+void merge_sort(list_ele_t **head)
 {
-    if (*head == NULL || (*head)->next == NULL)
+    if (!(*head) || !(*head)->next)
         return;
+    list_ele_t *fast = (*head)->next;
+    list_ele_t *slow = *head;
 
-    list_ele_t *left_list, *right_list;
-    /* Split head into 'a' and 'b' sublists */
-    FrontBackSplit(*head, &left_list, &right_list);
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    fast = slow->next;
+    slow->next = NULL;
 
-    /* Recursively sort the sublists */
-    MergeSort(&left_list);
-    MergeSort(&right_list);
+    merge_sort(head);
+    merge_sort(&fast);
 
-    /* answer = merge the two sorted lists together */
-    *head = SortedMerge(left_list, right_list);
+    *head = merge(*head, fast);
 }
-
 
 
 void q_sort(queue_t *q)
 {
     if (!q)
         return;
-    MergeSort(&q->head);
-    list_ele_t *cursor = q->head;
-    for (; cursor && cursor->next; cursor = cursor->next)
-        ;
-    q->tail = cursor;
+    merge_sort(&q->head);
+    if (!q->tail)
+        return;
+    while (q->tail->next)
+        q->tail = q->tail->next;
 }
