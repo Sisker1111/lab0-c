@@ -80,8 +80,9 @@ node_t *rev_reverse(node_t **head, node_t *node)
         *head = node;
         return node;
     }
-    node_t *node1 = rev_reverse(head, node->next);
-    node1->next = node;
+    rev_reverse(head, node->next);
+    node->next->next = node;
+    node->next = NULL;
     return node;
 }
 
@@ -89,8 +90,8 @@ void recursive_reverse(node_t **head)
 {
     if (*head && (*head)->next) {
         node_t *cursor = *head;
-        node_t *node1 = rev_reverse(head, (*head)->next);
-        node1->next = cursor;
+        rev_reverse(head, (*head)->next);
+        cursor->next->next = cursor;
         cursor->next = NULL;
     }
 }
