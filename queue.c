@@ -236,6 +236,6 @@ void q_sort(queue_t *q)
     merge_sort(&q->head);
     if (!q->tail)
         return;
-    while (q->tail->next)
-        q->tail = q->tail->next;
+    for (; q->tail->next; q->tail = q->tail->next)
+        ;
 }
